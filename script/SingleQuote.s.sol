@@ -18,11 +18,13 @@ contract SingleQuoteScript is Script, LZConfig {
 
     ///////////// CONFIGURE SCRIPT PARAMS HERE /////////////
 
-    uint32 internal srcEid = EID_ARBITRUM;
+    // Remember to adjust the run() function!
+    uint32 internal srcEid = EID_ARBITRUM; // Source this in src/LZConfig.sol
     uint128 internal gas = 50_000; // Must be in units of gas, not in gwei
     uint128 internal msgValue = 0.01 ether;
     bytes internal message = abi.encode("Zodomo");
     bool internal payInLzToken = false;
+    // Remember to adjust the run() function!
 
     ////////////////////////////////////////////////////////
 
@@ -93,13 +95,13 @@ contract SingleQuoteScript is Script, LZConfig {
     // Don't forget to copy .env.example into .env and populate the RPC variables!
     // Run `source .env` in your terminal before you execute the scripts.
     function setUp() public {
-        _deploy("Ethereum", vm.envString("ETHEREUM_RPC_URL"), EID_ETHEREUM);
+        /*_deploy("Ethereum", vm.envString("ETHEREUM_RPC_URL"), EID_ETHEREUM);
         _deploy("BNB Chain", vm.envString("BNB_RPC_URL"), EID_BNB);
         _deploy("Avalanche", vm.envString("AVALANCHE_RPC_URL"), EID_AVALANCHE);
         _deploy("Polygon", vm.envString("POLYGON_RPC_URL"), EID_POLYGON);
         _deploy("Arbitrum", vm.envString("ARBITRUM_RPC_URL"), EID_ARBITRUM);
         _deploy("Optimism", vm.envString("OPTIMISM_RPC_URL"), EID_OPTIMISM);
-        /*_deploy("Fantom", vm.envString("FANTOM_RPC_URL"), EID_FANTOM);
+        _deploy("Fantom", vm.envString("FANTOM_RPC_URL"), EID_FANTOM);
         _deploy("DFK", vm.envString("DFK_RPC_URL"), EID_DFK);
         _deploy("Harmony", vm.envString("HARMONY_RPC_URL"), EID_HARMONY);
         _deploy("Dexalot", vm.envString("DEXALOT_RPC_URL"), EID_DEXALOT);
