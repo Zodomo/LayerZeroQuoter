@@ -123,7 +123,7 @@ LayerZeroQuoter was designed using Foundry, so I recommend familiarizing yoursel
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-1. Pick either of the scripts in `./scripts/` and modify the variables near the top of the script you want to run:</br>
+1. Pick either of the scripts in `./scripts/` and modify the variables near the top of the script you want to run.</br>
     MeshQuote.s.sol:
     ```solidity
     uint128 internal gas = 50_000; // Must be in units of gas, not in gwei
@@ -141,8 +141,7 @@ LayerZeroQuoter was designed using Foundry, so I recommend familiarizing yoursel
     ```
 </br>
 
-2. Comment and/or uncomment each _deploy() call in the specified script's run() function to configure which chains you are testing.
-</br>
+2. Comment and/or uncomment each _deploy() call in the specified script's run() function to configure which chains you are testing.</br>
     Example:
     ```solidity
     _deploy("Ethereum", vm.envString("ETHEREUM_RPC_URL"), EID_ETHEREUM);
@@ -154,7 +153,7 @@ LayerZeroQuoter was designed using Foundry, so I recommend familiarizing yoursel
     ```
 </br>
 
-3. Lastly, execute your preferred script using one of the following commands (be careful not to broadcast, as that is not necessary):
+3. Lastly, execute your preferred script using one of the following commands (be careful not to broadcast, as that is not necessary).</br>
     ```sh
     forge script script/SingleQuote.s.sol --sig "run()" -vvv
     ```
