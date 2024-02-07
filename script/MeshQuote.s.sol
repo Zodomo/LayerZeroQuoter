@@ -134,8 +134,8 @@ contract MeshQuoteScript is Script, LZConfig {
         console2.log("");
         console2.log(LibString.concat("Number of chains in mesh: ", _eids.length.toString()));
         console2.log(LibString.concat("Units of gas spent: ", uint256(gas).toString()));
-        console2.log(LibString.concat("Value delivered (in wei): ", uint256(msgValue).toString()));
-        console2.log(LibString.concat("Value delivered (in ether): ", _weiToEtherString(msgValue)));
+        console2.log(LibString.concat("Value delivered (in wei units): ", uint256(msgValue).toString()));
+        console2.log(LibString.concat("Value delivered (in ether units): ", _weiToEtherString(msgValue)));
         console2.log(LibString.concat("Message length (in bytes): ", message.length.toString()));
         if (payInLzToken) console2.log("Pay in LZ token: true");
         else console2.log("Pay in LZ token: false");
@@ -154,11 +154,11 @@ contract MeshQuoteScript is Script, LZConfig {
                 (uint256 nativeFee, uint256 lzTokenFee) = quoter.quote(uint32(_eids[j]), message, options, payInLzToken);
                 console2.log(LibString.concat("Destination: ", destination.chain));
                 if (payInLzToken) {
-                    console2.log(LibString.concat("LZ token fee (in wei): ", lzTokenFee.toString()));
-                    console2.log(LibString.concat("LZ token fee (in ether): ", _weiToEtherString(lzTokenFee)));
+                    console2.log(LibString.concat("LZ token fee (in wei units): ", lzTokenFee.toString()));
+                    console2.log(LibString.concat("LZ token fee (in ether units): ", _weiToEtherString(lzTokenFee)));
                 } else {
-                    console2.log(LibString.concat("Native token fee (in wei): ", nativeFee.toString()));
-                    console2.log(LibString.concat("Native token fee (in ether): ", _weiToEtherString(nativeFee)));
+                    console2.log(LibString.concat("Native token fee (in wei units): ", nativeFee.toString()));
+                    console2.log(LibString.concat("Native token fee (in ether units): ", _weiToEtherString(nativeFee)));
                 }
                 console2.log("");
             }
