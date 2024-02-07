@@ -143,7 +143,7 @@ LayerZeroQuoter was designed using Foundry, so I recommend familiarizing yoursel
 
 2. Comment and/or uncomment each _deploy() call in the specified script's run() function to configure which chains you are testing.
 </br>
-Example:
+    Example:
     ```solidity
     _deploy("Ethereum", vm.envString("ETHEREUM_RPC_URL"), EID_ETHEREUM);
     //_deploy("BNB Chain", vm.envString("BNB_RPC_URL"), EID_BNB);
