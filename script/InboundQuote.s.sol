@@ -9,7 +9,7 @@ import {LibString} from "../lib/solady/src/utils/LibString.sol";
 import {OptionsBuilder} from "../lib/LayerZero-v2/oapp/contracts/oapp/libs/OptionsBuilder.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract MeshQuoteScript is Script, LZConfig {
+contract InboundQuoteScript is Script, LZConfig {
     using LibString for string;
     using LibString for uint256;
     using LibString for address;
@@ -19,6 +19,7 @@ contract MeshQuoteScript is Script, LZConfig {
     ///////////// CONFIGURE SCRIPT PARAMS HERE /////////////
 
     // Remember to adjust the setUp() function!
+    uint32 internal dstEid = EID_ETHEREUM; // Source this from src/LZConfig.sol
     uint128 internal gas = 29_000; // Must be in units of gas, not in gwei
     uint128 internal msgValue = 0.01 ether;
     bytes internal message = abi.encode(address(420), abi.encodeWithSignature("placeBid(bytes32)", bytes32(bytes("zodomo"))));
@@ -65,7 +66,7 @@ contract MeshQuoteScript is Script, LZConfig {
 
         uint256 forkId = vm.createFork(rpcUrl);
         vm.selectFork(forkId);
-        vm.deal(msg.sender, 10 ether + msgValue);
+        vm.deal(msg.sender, 10 ether);
 
         vm.startBroadcast();
         LayerZeroQuoter quoter = new LayerZeroQuoter(endpoint, msg.sender);
@@ -78,16 +79,14 @@ contract MeshQuoteScript is Script, LZConfig {
 
     function _configure() internal {
         uint256[] memory _eids = eids.values();
+        Deployment memory destination = deployments[dstEid];
         for (uint256 i; i < _eids.length; ++i) {
-            Deployment memory deployment = deployments[_eids[i]];
-            vm.selectFork(deployment.forkId);
-            LayerZeroQuoter quoter = LayerZeroQuoter(deployment.addr);
+            if (_eids[i] == dstEid) continue;
+            Deployment memory peer = deployments[_eids[i]];
+            vm.selectFork(peer.forkId);
+            LayerZeroQuoter quoter = LayerZeroQuoter(peer.addr);
             vm.startBroadcast();
-            for (uint256 j; j < _eids.length; ++j) {
-                if (i == j) continue;
-                Deployment memory peer = deployments[_eids[j]];
-                quoter.setPeer(uint32(_eids[j]), _addressToBytes32(peer.addr));
-            }
+            quoter.setPeer(dstEid, _addressToBytes32(destination.addr));
             vm.stopBroadcast();
         }
     }
@@ -211,10 +210,11 @@ contract MeshQuoteScript is Script, LZConfig {
     function run() public {
         bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(gas, msgValue);
         uint256[] memory _eids = eids.values();
+        Deployment memory destination = deployments[dstEid];
 
-        console2.log("---------------- Mesh Network Quote Estimations ----------------");
+        console2.log(LibString.concat("------- ", destination.chain.concat(" Inbound Quote Estimations -------")));
         console2.log("");
-        console2.log(LibString.concat("Number of chains in mesh: ", _eids.length.toString()));
+        console2.log(LibString.concat("Number of origin chains: ", uint256(_eids.length - 1).toString()));
         console2.log(LibString.concat("Units of gas spent: ", uint256(gas).toString()));
         console2.log(LibString.concat("Value delivered (in wei units): ", uint256(msgValue).toString()));
         console2.log(LibString.concat("Value delivered (in ether units): ", _weiToEtherString(msgValue)));
@@ -224,30 +224,23 @@ contract MeshQuoteScript is Script, LZConfig {
         console2.log("");
 
         for (uint256 i; i < _eids.length; ++i) {
+            if (_eids[i] == dstEid) continue;
             Deployment memory deployment = deployments[_eids[i]];
             vm.selectFork(deployment.forkId);
             LayerZeroQuoter quoter = LayerZeroQuoter(deployment.addr);
-            console2.log(LibString.concat("------- Source Chain: ", deployment.chain).concat(" -------"));
-            console2.log("");
             vm.startBroadcast();
-            for (uint256 j; j < _eids.length; ++j) {
-                if (i == j) continue;
-                Deployment memory destination = deployments[_eids[j]];
-                (uint256 nativeFee, uint256 lzTokenFee) = quoter.quote(uint32(_eids[j]), message, options, payInLzToken);
-                console2.log(LibString.concat("Destination: ", destination.chain));
-                if (payInLzToken) {
-                    console2.log(LibString.concat("LZ token fee (in wei units): ", lzTokenFee.toString()));
-                    console2.log(LibString.concat("LZ token fee (in ether units): ", _weiToEtherString(lzTokenFee)));
-                } else {
-                    console2.log(LibString.concat("Native token fee (in wei units): ", nativeFee.toString()));
-                    console2.log(LibString.concat("Native token fee (in ether units): ", _weiToEtherString(nativeFee)));
-                }
-                console2.log("");
-            }
+            (uint256 nativeFee, uint256 lzTokenFee) = quoter.quote(dstEid, message, options, payInLzToken);
             vm.stopBroadcast();
-            console2.log("----------------------------------------");
+            console2.log(LibString.concat("Origin: ", deployment.chain));
+            if (payInLzToken) {
+                console2.log(LibString.concat("LZ token fee (in wei units): ", lzTokenFee.toString()));
+                console2.log(LibString.concat("LZ token fee (in ether units): ", _weiToEtherString(lzTokenFee)));
+            } else {
+                console2.log(LibString.concat("Native token fee (in wei units): ", nativeFee.toString()));
+                console2.log(LibString.concat("Native token fee (in ether units): ", _weiToEtherString(nativeFee)));
+            }
             console2.log("");
         }
-        console2.log("----------------------------------------------------------------");
+        console2.log("--------------------------------------------------");
     }
 }
